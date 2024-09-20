@@ -10,7 +10,9 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 from django.http import HttpResponse
-
+from carts.models import  Cart, CartItem
+from carts.views import _cart_id
+import requests
 
 # Create your views here.
 
@@ -20,18 +22,23 @@ def register(request):
         if form.is_valid():
             first_name = form.cleaned_data['first_name']
             last_name = form.cleaned_data['last_name']
-            phone = form.cleaned_data['phone']
+            phone_number = form.cleaned_data['phone_number']
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
             username = email.split("@")[0]
             user = Account.objects.create_user(first_name=first_name, last_name=last_name, email=email, username=username, password=password)
-            user.phone = phone
+            user.phone_number = phone_number
             user.save()
 
+            # # Create a user profile
+            # profile = UserProfile()
+            # profile.user_id = user.id
+            # profile.profile_picture = 'default/default-user.png'
+            # profile.save()
 
-            #User Activation
+            # USER ACTIVATION
             current_site = get_current_site(request)
-            mail_subject = 'Please activate your account first!'
+            mail_subject = 'Please activate your account'
             message = render_to_string('accounts/account_verification_email.html', {
                 'user': user,
                 'domain': current_site,
@@ -41,19 +48,15 @@ def register(request):
             to_email = email
             send_email = EmailMessage(mail_subject, message, to=[to_email])
             send_email.send()
-            # messages.success(request, 'Thank you for registering with us. We have sent you a verification email to your email address. Please verify it first and enjoy the shopping!!.')
+            # messages.success(request, 'Thank you for registering with us. We have sent you a verification email to your email address [rathan.kumar@gmail.com]. Please verify it.')
             return redirect('/accounts/login/?command=verification&email='+email)
-        
-
-            messages.success(request, 'Registration Successful!!')
-            return redirect ('register')
     else:
         form = RegistrationForm()
-
     context = {
-        'form': form
+        'form': form,
     }
-    return render (request, 'accounts/register.html', context)
+    return render(request, 'accounts/register.html', context)
+
 
 
 def login(request):
@@ -64,10 +67,60 @@ def login(request):
         user = auth.authenticate(email=email, password=password)
 
         if user is not None:
-            # If the user exists and credentials are valid, log them in
+            try:
+                cart = Cart.objects.get(cart_id=_cart_id(request))
+                is_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
+                if is_cart_item_exists:
+                    cart_item = CartItem.objects.filter(cart=cart)
+
+                    # Getting the product variations by cart id
+                    product_variation = []
+                    for item in cart_item:
+                        variation = item.variations.all()
+                        product_variation.append(list(variation))
+
+                    # Get the cart items from the user to access his product variations
+                    cart_item = CartItem.objects.filter(user=user)
+                    ex_var_list = []
+                    id = []
+                    for item in cart_item:
+                        existing_variation = item.variations.all()
+                        ex_var_list.append(list(existing_variation))
+                        id.append(item.id)
+
+                    # product_variation = [1, 2, 3, 4, 6]
+                    # ex_var_list = [4, 6, 3, 5]
+
+                    for pr in product_variation:
+                        if pr in ex_var_list:
+                            index = ex_var_list.index(pr)
+                            item_id = id[index]
+                            item = CartItem.objects.get(id=item_id)
+                            item.quantity += 1
+                            item.user = user
+                            item.save()
+                        else:
+                            cart_item = CartItem.objects.filter(cart=cart)
+                            for item in cart_item:
+                                item.user = user
+                                item.save()
+                                
+                                            
+            except Cart.DoesNotExist:
+                pass
+
             auth.login(request, user)
             messages.success(request, "You have successfully logged in!!")
-            return redirect('home')  # Redirect to the homepage or dashboard after login
+            url = request.META.get('HTTP_REFERER')
+            try:
+                query = requests.utils.urlparse(url).query
+                # next=/cart/checkout/
+                params = dict(x.split('=') for x in query.split('&'))
+                if 'next' in params:
+                    nextPage = params['next']
+                    return redirect(nextPage)
+            except:
+                return redirect('home')  # Redirect to the homepage or dashboard after login
         else:
             # Invalid credentials
             messages.error(request, "Invalid email or password! Try again with valid credentials")

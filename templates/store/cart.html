@@ -47,7 +47,7 @@
                   <div class="col">
                     <div class="input-group input-spinner">
                       <div class="input-group-prepend">
-                        <a href="{% url 'remove_cart' cart_item.product.id %}"
+                        <a href="{% url 'remove_cart' cart_item.product.id cart_item.id %}" 
                           class="btn btn-light"
                           type="button"
                           id="button-plus"
@@ -78,7 +78,7 @@
                   <!-- price-wrap .// -->
                 </td>
                 <td class="text-right">
-                  <a href="{% url 'remove_cart_item' cart_item.product.id %}" class="btn btn-danger"> Remove</a>
+                  <a href="{% url 'remove_cart_item' cart_item.product.id cart_item.id %}" onclick="return confirm('Are you sure you want to delete this item?')" class="btn btn-danger"> Remove</a>
                 </td>
               </tr>
 
@@ -97,7 +97,15 @@
               <dd class="text-right">₹ {{ total }}</dd>
             </dl>
             <dl class="dlist-align">
-              <dt>Tax:</dt>
+              
+              <dt data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Convenience Fees:
+                  
+                <div class="dropdown-menu">
+                  <option value="labour">Labour</option>
+              <option value="labour">Delivery</option>
+              <option value="labour">Packaging</option>
+                </div>
+            </dt>
               <dd class="text-right">₹ {{ tax }}</dd>
             </dl>
             <dl class="dlist-align">
@@ -111,7 +119,7 @@
                 height="26"
               />
             </p>
-            <a href="./place-order.html" class="btn btn-primary btn-block">
+            <a href="{% url 'checkout' %}" class="btn btn-primary btn-block">
               Checkout
             </a>
             <a href="{% url 'store' %}" class="btn btn-light btn-block"
