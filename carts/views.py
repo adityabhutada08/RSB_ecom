@@ -189,7 +189,7 @@ def cart(request, total=0, quantity=0, cart_items=None):
         tax = (2 * total)/100
         grand_total = total + tax
     except ObjectDoesNotExist:
-        pass #just ignore
+        pass
 
     context = {
         'total': total,

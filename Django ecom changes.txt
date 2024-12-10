@@ -1,1 +1,42 @@
 1 . paginator from the store. views  in if else code block
+
+
+
+new commit to add in git
+
+
+hanges not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   RSB/settings.py
+        modified:   RSB/urls.py
+        modified:   RSB/views.py
+        modified:   accounts/admin.py
+        modified:   accounts/forms.py
+        modified:   accounts/models.py
+        modified:   accounts/urls.py
+        modified:   accounts/views.py
+        modified:   carts/views.py
+        modified:   store/admin.py
+        modified:   store/models.py
+        modified:   store/urls.py
+        modified:   store/views.py
+        modified:   templates/store/checkout.html
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        RSB/static/js/jquery-3.3.1.min.js
+        accounts/migrations/0003_userprofile.py
+        orders/
+        static/js/jquery-3.3.1.min.js
+        store/forms.py
+        store/migrations/0004_productgallery_reviewrating.py
+        templates/accounts/change_password.html
+        templates/accounts/edit_profile.html
+        templates/accounts/my_orders.html
+        templates/accounts/order_detail.html
+        templates/includes/dashboard_sidebar.html
+        templates/orders/
+
+no changes added to commit (use "git add" and/or "git commit -a")
+(env) PS D:\DJANGO PROJECTS\MAIN ECOM WEB\RSB> 
