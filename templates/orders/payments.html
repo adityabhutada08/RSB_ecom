@@ -68,7 +68,7 @@
 									</td>
 									<td>
 										<!-- col.// -->
-										<label for="">{{cart_item.quantity}}</label>
+										<span>{{cart_item.quantity}}</span>
 									</td>
 									<td>
 										<div class="price-wrap">
@@ -104,6 +104,7 @@
 								  <option value="labour">Labour</option>
 							  <option value="labour">Delivery</option>
 							  <option value="labour">Packaging</option>
+							  <option value="labour">GST</option>
 								</div>
 							</dt>
 							<dd class="text-right">₹ {{ tax }}</dd>
@@ -121,7 +122,9 @@
 
 						<div id="paypal-button-container">
 							{% comment %} PayPal Button Will Load {% endcomment %}
-							<button id="rzp-button1" class="btn btn-primary btn-block">Pay Now</button>
+							<form id="razorpay-form" method="post"> {% csrf_token %}
+								 <button id="rzp-button1" class="btn btn-primary btn-block" >Pay Now</button> 
+							</form>
 						</div>
 						
 
@@ -137,83 +140,70 @@
 
 	</div> <!-- container .//  -->
 </section>
+
 <!-- ========================= SECTION CONTENT END// ========================= -->
+ <!-- payments.html -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-<script>
-
-	function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-	var amount = "{{ grand_total }}"
-	var url = "{% url 'payments' %}"
-	var csrftoken = getCookie('csrftoken');
-	var orderID = "{{order.order_number}}"
-	var payment_method = 'PayPal'
-	var redirect_url = "{% url 'order_complete' %}"
-	// Render the PayPal button into #paypal-button-container
-	paypal.Buttons({
-
-		style: {
-			color: 'blue',
-			shape: 'rect',
-			label: 'pay',
-			height: 40
-		},
-
-		// Set up the transaction
-		createOrder: function(data, actions) {
-			return actions.order.create({
-				purchase_units: [{
-					amount: {
-						value: amount,
-					}
-				}]
-			});
-		},
-
-		// Finalize the transaction
-		onApprove: function(data, actions) {
-			return actions.order.capture().then(function(details) {
-				// Show a success message to the buyer
-				console.log(details);
-				sendData();
-				function sendData(){
-					fetch(url, {
-						method : "POST",
-						headers: {
-							"Content-type": "application/json",
-							"X-CSRFToken": csrftoken,
-						},
-						body: JSON.stringify({
-							orderID: orderID,
-							transID: details.id,
-							payment_method: payment_method,
-							status: details.status,
-						}),
-					})
-				  .then((response) => response.json())
-				  .then((data) => {
-						window.location.href = redirect_url + '?order_number='+data.order_number+'&payment_id='+data.transID;
-					});
+<script> 
+	function getCookie(name) { 
+		let cookieValue = null; 
+		if (document.cookie && document.cookie !== '') { 
+			const cookies = document.cookie.split(';'); 
+			for (let i = 0; i < cookies.length; i++) { 
+				const cookie = cookies[i].trim();
+				if (cookie.substring(0, name.length + 1) === (name + '=')) { 
+					cookieValue = decodeURIComponent(cookie.substring(name.length + 1)); 
+					break;
+				 }
 				}
-			});
-		}
+		} 
+		return cookieValue; 
+	} 
+	const csrftoken = getCookie('csrftoken');
 
-
-	}).render('#paypal-button-container');
+    var options = {
+        "key": "{{ rzp_test_BiGWKiQBtBzjNH }}", 
+        "amount": "{{ grand_total }}", 
+        "currency": "INR",
+        "name": "RSB Grocery",
+        "description": "Test Transaction",
+        "order_id": "{{ razorpay_order_id }}", 
+        "handler": function (response){
+            $.ajax({
+                type: "POST",
+                url: "{% url 'payments' %}",
+                data: JSON.stringify({
+                    orderID: "{{ order.order_number }}",
+                    transID: response.razorpay_payment_id,
+                    payment_method: 'Razorpay',
+                    status: 'captured'
+                }),
+                contentType: "application/json",
+				headers: { 'X-CSRFToken': csrftoken },
+                success: function (response) {
+                    window.location.href = "{% url 'order_complete' %}?order_number=" + response.order_number + "&payment_id=" + response.transID;
+                }
+            });
+        },
+        "prefill": {
+            "name": "{{ order.first_name }} {{ order.last_name }}",
+            "email": "{{ order.email }}",
+            "contact": "{{ order.phone }}"
+        },
+        "theme": {
+            "color": "#3399cc"
+        }
+    };
+    var rzp1 = new Razorpay(options);
+    rzp1.on('payment.failed', function (response){
+        alert(response.error.code);
+        alert(response.error.description);
+    });
+    document.getElementById('rzp-button1').onclick = function(e){
+        rzp1.open();
+        e.preventDefault();
+    }
 </script>
 
 {% endblock %}

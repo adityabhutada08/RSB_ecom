@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect,get_object_or_404
 from . forms import RegistrationForm, UserForm, UserProfileForm
-from . models import Account, UserProfile
+from accounts.models import Account, UserProfile
 from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
@@ -24,19 +24,19 @@ def register(request):
         if form.is_valid():
             first_name = form.cleaned_data['first_name']
             last_name = form.cleaned_data['last_name']
-            phone_number = form.cleaned_data['phone_number']
+            phone = form.cleaned_data['phone']
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
             username = email.split("@")[0]
             user = Account.objects.create_user(first_name=first_name, last_name=last_name, email=email, username=username, password=password)
-            user.phone_number = phone_number
+            user.phone = phone
             user.save()
 
-            # # Create a user profile
-            # profile = UserProfile()
-            # profile.user_id = user.id
-            # profile.profile_picture = 'default/default-user.png'
-            # profile.save()
+            # Create a user profile
+            profile = UserProfile()
+            profile.user_id = user.id
+            profile.profile_picture = 'default/default-user.png'
+            profile.save()
 
             # USER ACTIVATION
             current_site = get_current_site(request)
@@ -50,7 +50,7 @@ def register(request):
             to_email = email
             send_email = EmailMessage(mail_subject, message, to=[to_email])
             send_email.send()
-            # messages.success(request, 'Thank you for registering with us. We have sent you a verification email to your email address [rathan.kumar@gmail.com]. Please verify it.')
+            # messages.success(request, 'Thank you for registering with us. We have sent you a verification email to your email address [aditya.bhutada@gmail.com]. Please verify it.')
             return redirect('/accounts/login/?command=verification&email='+email)
     else:
         form = RegistrationForm()
@@ -157,15 +157,15 @@ def activate(request, uidb64, token):
 
 @login_required(login_url = 'login')
 def dashboard(request):
-    # orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
-    # orders_count = orders.count()
-
-    # userprofile = UserProfile.objects.get(user_id=request.user.id)
-    # context = {
-    #     'orders_count': orders_count,
-    #     'userprofile': userprofile,
-    # }
-    return render(request, 'accounts/dashboard.html')
+    orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
+    orders_count = orders.count()
+    user = request.user
+    userprofile, created = UserProfile.objects.get_or_create(user=user)  # Create UserProfile if it doesn't exist
+    context = {
+        'orders_count': orders_count,
+        'userprofile': userprofile,
+    }
+    return render(request, 'accounts/dashboard.html', context)
 
 
 

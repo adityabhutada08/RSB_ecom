@@ -1,100 +1,43 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from carts.models import CartItem
 from .forms import OrderForm
 import datetime
 from .models import Order, Payment, OrderProduct
-import json
 from store.models import Product
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
+from django.conf import settings
+import razorpay
+import json
+import logging
 
+# Initialize Razorpay client
+client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_SECRET_KEY))
 
-def payments(request):
-    body = json.loads(request.body)
-    order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
+# Configure logging
+logger = logging.getLogger(__name__)
 
-    # Store transaction details inside Payment model
-    payment = Payment(
-        user = request.user,
-        payment_id = body['transID'],
-        payment_method = body['payment_method'],
-        amount_paid = order.order_total,
-        status = body['status'],
-    )
-    payment.save()
-
-    order.payment = payment
-    order.is_ordered = True
-    order.save()
-
-    # Move the cart items to Order Product table
-    cart_items = CartItem.objects.filter(user=request.user)
-
-    for item in cart_items:
-        orderproduct = OrderProduct()
-        orderproduct.order_id = order.id
-        orderproduct.payment = payment
-        orderproduct.user_id = request.user.id
-        orderproduct.product_id = item.product_id
-        orderproduct.quantity = item.quantity
-        orderproduct.product_price = item.product.price
-        orderproduct.ordered = True
-        orderproduct.save()
-
-        cart_item = CartItem.objects.get(id=item.id)
-        product_variation = cart_item.variations.all()
-        orderproduct = OrderProduct.objects.get(id=orderproduct.id)
-        orderproduct.variations.set(product_variation)
-        orderproduct.save()
-
-
-        # Reduce the quantity of the sold products
-        product = Product.objects.get(id=item.product_id)
-        product.stock -= item.quantity
-        product.save()
-
-    # Clear cart
-    CartItem.objects.filter(user=request.user).delete()
-
-    # Send order recieved email to customer
-    mail_subject = 'Thank you for your order!'
-    message = render_to_string('orders/order_recieved_email.html', {
-        'user': request.user,
-        'order': order,
-    })
-    to_email = request.user.email
-    send_email = EmailMessage(mail_subject, message, to=[to_email])
-    send_email.send()
-
-    # Send order number and transaction id back to sendData method via JsonResponse
-    data = {
-        'order_number': order.order_number,
-        'transID': payment.payment_id,
-    }
-    return JsonResponse(data)
-
-def place_order(request, total=0, quantity=0,):
+def place_order(request, total=0, quantity=0):
     current_user = request.user
 
-    # If the cart count is less than or equal to 0, then redirect back to shop
+    # Check if cart is empty
     cart_items = CartItem.objects.filter(user=current_user)
-    cart_count = cart_items.count()
-    if cart_count <= 0:
+    if not cart_items.exists():
         return redirect('store')
 
     grand_total = 0
     tax = 0
     for cart_item in cart_items:
-        total += (cart_item.product.price * cart_item.quantity)
+        total += cart_item.product.price * cart_item.quantity
         quantity += cart_item.quantity
-    tax = (2 * total)/100
+    tax = (3.5 * total) / 100
     grand_total = total + tax
 
     if request.method == 'POST':
         form = OrderForm(request.POST)
         if form.is_valid():
-            # Store all the billing information inside Order table
+            # Save order details
             data = Order()
             data.user = current_user
             data.first_name = form.cleaned_data['first_name']
@@ -111,51 +54,150 @@ def place_order(request, total=0, quantity=0,):
             data.tax = tax
             data.ip = request.META.get('REMOTE_ADDR')
             data.save()
+
             # Generate order number
-            yr = int(datetime.date.today().strftime('%Y'))
-            dt = int(datetime.date.today().strftime('%d'))
-            mt = int(datetime.date.today().strftime('%m'))
-            d = datetime.date(yr,mt,dt)
-            current_date = d.strftime("%Y%m%d") #20241209
-            order_number = current_date + str(data.id)
+            current_date = datetime.date.today().strftime("%Y%m%d")
+            order_number = f"{current_date}{data.id}"
             data.order_number = order_number
             data.save()
 
-            order = Order.objects.get(user=current_user, is_ordered=False, order_number=order_number)
+            # Create Razorpay Order
+            razorpay_order = client.order.create({
+                "amount": int(grand_total * 100),
+                "currency": "INR",
+                "receipt": order_number,
+                "payment_capture": 1,
+            })
+
             context = {
-                'order': order,
+                'order': data,
                 'cart_items': cart_items,
                 'total': total,
                 'tax': tax,
                 'grand_total': grand_total,
+                'razorpay_key': settings.RAZORPAY_KEY_ID,
+                'razorpay_order_id': razorpay_order['id'],
             }
-            return render(request, 'orders/payments.html', context)
-    else:
-        return redirect('checkout')
+            print("Order created with order_number:", data.order_number)
 
+            return render(request, 'orders/payments.html', context)
+    return redirect('checkout')
+
+from django.db import transaction
+
+def payments(request):
+    body = json.loads(request.body)
+    try:
+        with transaction.atomic():
+            # Fetch the order
+            order = Order.objects.get(
+                user=request.user, is_ordered=False, order_number=body['orderID']
+            )
+
+            # Save payment details
+            payment = Payment.objects.create(
+                user=request.user,
+                payment_id=body['transID'],
+                payment_method=body['payment_method'],
+                amount_paid=order.order_total,
+                status=body['status'],
+            )
+
+            # Update order status
+            if body['status'] == 'captured':
+                order.payment = payment
+                order.is_ordered = True
+                order.save()
+
+                print(f"Order updated successfully: {order.order_number}, is_ordered={order.is_ordered}")
+
+                # Move cart items to order products
+                cart_items = CartItem.objects.filter(user=request.user)
+                for item in cart_items:
+                    orderproduct = OrderProduct.objects.create(
+                        order=order,
+                        payment=payment,
+                        user=request.user,
+                        product=item.product,
+                        quantity=item.quantity,
+                        product_price=item.product.price,
+                        ordered=True,
+                    )
+
+                    # Reduce stock
+                    item.product.stock -= item.quantity
+                    item.product.save()
+
+                # Clear the cart
+                cart_items.delete()
+
+                # Send confirmation email
+                mail_subject = "Thank you for your order!"
+                try:
+                    message = render_to_string('orders/order_received_email.html', {
+                        'user': request.user,
+                        'order': order,
+                    })
+                    to_email = request.user.email
+                    send_email = EmailMessage(mail_subject, message, to=[to_email])
+                    send_email.send()
+                    print("Order confirmation email sent successfully.")
+                except Exception as e:
+                    logger.error(f"Error sending confirmation email: {e}")
+                    print(f"Error sending confirmation email: {e}")
+
+                print("Payment and order processing completed successfully.")
+
+                # Return success response
+                return JsonResponse({
+                    'success': True,
+                    'order_number': order.order_number,
+                    'transID': payment.payment_id,
+                })
+            else:
+                print("Payment not captured.")
+                return JsonResponse({'success': False, 'message': 'Payment not captured!'}, status=400)
+    except Order.DoesNotExist:
+        print("Order does not exist.")
+        return JsonResponse({'success': False, 'message': 'Order not found!'}, status=404)
+    except Exception as e:
+        logger.error(f"Payment error: {e}")
+        print(f"Payment error: {e}")
+        return JsonResponse({'success': False, 'message': 'Payment processing failed!'}, status=500)
 
 def order_complete(request):
-    order_number = request.GET.get('order_number')
-    transID = request.GET.get('payment_id')
+    order_number = request.GET.get('order_number', '').strip()
+    transID = request.GET.get('payment_id', '').strip()
+
+    print("Received order_number:", order_number)
+    print("Received transID:", transID)
+
+    if not order_number or not transID:
+        print("Missing parameters.")
+        return redirect('home')
 
     try:
+        # Fetch the order and payment
         order = Order.objects.get(order_number=order_number, is_ordered=True)
-        ordered_products = OrderProduct.objects.filter(order_id=order.id)
-
-        subtotal = 0
-        for i in ordered_products:
-            subtotal += i.product_price * i.quantity
-
         payment = Payment.objects.get(payment_id=transID)
+        ordered_products = OrderProduct.objects.filter(order=order)
+
+        # Calculate subtotal
+        subtotal = sum([item.quantity * item.product_price for item in ordered_products])
 
         context = {
             'order': order,
-            'ordered_products': ordered_products,
-            'order_number': order.order_number,
-            'transID': payment.payment_id,
             'payment': payment,
+            'ordered_products': ordered_products,
+            'order_number': order_number,
+            'transID': transID,
             'subtotal': subtotal,
         }
+        print("Order and payment found. Rendering order_complete.")
         return render(request, 'orders/order_complete.html', context)
-    except (Payment.DoesNotExist, Order.DoesNotExist):
+    except Order.DoesNotExist:
+        print(f"Order with number {order_number} does not exist or is not marked as ordered.")
+        return redirect('home')
+    except Payment.DoesNotExist:
+        print(f"Payment with ID {transID} does not exist.")
         return redirect('home')
