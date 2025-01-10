@@ -50,5 +50,5 @@ razor pay secret key - nAir7CDq7Vd6K7gQvSfe6xWN
 for this test id - rzp_test_OnLJ9QcfkCKC4j
 
 
-Access key - AKIAZI2LIW7MKJ3GWXE4
-Secret access key- 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
+AKIAZI2LIW7MKJ3GWXE4
+OedsNlst5KdPj2h+iN38ElEX9wkQZr6hMtXr40sn
