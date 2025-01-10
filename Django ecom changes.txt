@@ -46,9 +46,5 @@ no changes added to commit (use "git add" and/or "git commit -a")
 
 
 
-razor pay secret key - nAir7CDq7Vd6K7gQvSfe6xWN 
-for this test id - rzp_test_OnLJ9QcfkCKC4j
-
-
-AKIAZI2LIW7MKJ3GWXE4
-OedsNlst5KdPj2h+iN38ElEX9wkQZr6hMtXr40sn
+razor pay s - nAir7CDq7Vd6K7gQvSfe6xWN 
+test id - rzp_test_OnLJ9QcfkCKC4j
