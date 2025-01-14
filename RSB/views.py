@@ -14,3 +14,19 @@ def home(request):
         'reviews': reviews,
     }
     return render(request, 'home.html', context)
+
+
+def about_us(request):
+    return render(request, 'about_us.html')
+
+def contact_us(request):
+    return render(request, 'contact_us.html')
+
+def privacy_policy(request):
+    return render(request, 'privacy_policy.html')
+
+def terms_conditions(request):
+    return render(request, 'terms_conditions.html')
+
+def cancellation_policy(request):
+    return render(request, 'cancellation_policy.html')

@@ -2,42 +2,54 @@
 
 <!-- ========================= FOOTER ========================= -->
 <footer class="section-footer border-top">
-	<div class="container">
-		<section class="footer-bottom border-top row">
-			<div class="col-md-2">
-				<p class="text-muted"> &copy; 2024 RSB Grocery </p>
-			</div>
-			<div class="col-md-8 text-md-center">
-		
-				<div class="h-100 d-inline-flex align-items-center me-4 mb-3">
-					<i class="fa fa-envelope text-primary me-2"></i>
-					<a href="mailto:rsb.grocery@gmail.com" onclick="sendMail()"  style="color: rgb(75, 73, 73); margin-right: 20px;">
-						&nbsp;rsb.grocery@gmail.com
-					</a>
-				</div>
-		
-				<div class="h-100 d-inline-flex align-items-center me-4 mb-3">
-					<i class="fa fa-phone text-primary me-2"></i>
-					<a href="tel:+91 9422796555" onclick="makeCall()" style="color: rgb(75, 73, 73);margin-right: 20px;">&nbsp;
-						+91 9422796555
-					</a>
-				</div>
-		
-				<div class="h-100 d-inline-flex align-items-center me-4 mb-3">
-					<i class="fa fa-map-marker text-primary me-2"></i>
-					<a href="https://maps.app.goo.gl/C9Kq3oFbY2oDNinTA" target="_blank" style="color: rgb(75, 73, 73);">&nbsp;
-						Nava Mondha, Partur
-					</a>
-				</div>
-		
-			</div>
-			<!-- <div class="col-md-2 text-md-right text-muted">
-				<i class="fab fa-lg fa-cc-visa"></i>
-				<i class="fab fa-lg fa-cc-paypal"></i>
-				<i class="fab fa-lg fa-cc-mastercard"></i>
-			</div> -->
+    <div class="container">
+        <section class="footer-bottom border-top row">
+            <div class="col-md-2">
+                <p class="text-muted"> &copy; 2025 RSB Grocery </p>
+            </div>
+            <div class="col-md-8 text-md-center">
+                <div class="h-100 d-inline-flex align-items-center me-4 mb-3">
+                    <i class="fa fa-envelope text-primary me-2"></i>
+                    <a href="mailto:rsb.grocery@gmail.com" onclick="sendMail()" style="color: rgb(75, 73, 73); margin-right: 20px;">
+                        &nbsp;rsb.grocery@gmail.com
+                    </a>
+                </div>
 
-	</section>
-	</div><!-- //container -->
+                <div class="h-100 d-inline-flex align-items-center me-4 mb-3">
+                    <i class="fa fa-phone text-primary me-2"></i>
+                    <a href="tel:+91 9422796555" onclick="makeCall()" style="color: rgb(75, 73, 73);margin-right: 20px;">&nbsp;
+                        +91 9422796555
+                    </a>
+                </div>
+
+                <div class="h-100 d-inline-flex align-items-center me-4 mb-3">
+                    <i class="fa fa-map-marker text-primary me-2"></i>
+                    <a href="https://maps.app.goo.gl/C9Kq3oFbY2oDNinTA" target="_blank" style="color: rgb(75, 73, 73);">&nbsp;
+                        Nava Mondha, Partur
+                    </a>
+                </div>
+            </div>
+        </section>
+        <hr>
+        <section class="footer-links text-md-center">
+            <ul class="list-inline">
+                <li class="list-inline-item">
+                    <a href="{% url 'about_us' %}" style="color: rgb(75, 73, 73);">About Us</a>
+                </li>
+                <li class="list-inline-item">
+                    <a href="{% url 'contact_us' %}" style="color: rgb(75, 73, 73);">Contact Us</a>
+                </li>
+                <li class="list-inline-item">
+                    <a href="{% url 'privacy_policy' %}" style="color: rgb(75, 73, 73);">Privacy Policy</a>
+                </li>
+                <li class="list-inline-item">
+                    <a href="{% url 'terms_conditions' %}" style="color: rgb(75, 73, 73);">Terms & Conditions</a>
+                </li>
+                <li class="list-inline-item">
+                    <a href="{% url 'cancellation_policy' %}" style="color: rgb(75, 73, 73);">Cancellation/Refund Policies</a>
+                </li>
+            </ul>
+        </section>
+    </div><!-- //container -->
 </footer>
 <!-- ========================= FOOTER END // ========================= -->
