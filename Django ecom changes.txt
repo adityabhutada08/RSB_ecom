@@ -41,10 +41,3 @@ Untracked files:
 no changes added to commit (use "git add" and/or "git commit -a")
 (env) PS D:\DJANGO PROJECTS\MAIN ECOM WEB\RSB> 
 
-
-
-
-
-
-razor pay s - nAir7CDq7Vd6K7gQvSfe6xWN 
-test id - rzp_test_OnLJ9QcfkCKC4j
