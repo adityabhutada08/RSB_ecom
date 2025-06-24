@@ -11,6 +11,9 @@ from django.conf import settings
 import razorpay
 import json
 import logging
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from io import BytesIO
 
 # Initialize Razorpay client
 client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_SECRET_KEY))
@@ -134,7 +137,7 @@ def payments(request):
                 # Clear the cart
                 cart_items.delete()
 
-                # Send confirmation email
+                # Send confirmation email to customer
                 mail_subject = "Thank you for your order!"
                 try:
                     message = render_to_string('orders/order_received_email.html', {
@@ -148,6 +151,21 @@ def payments(request):
                 except Exception as e:
                     logger.error(f"Error sending confirmation email: {e}")
                     print(f"Error sending confirmation email: {e}")
+
+                # Generate PDF invoice and send to owner
+                try:
+                    ordered_products = OrderProduct.objects.filter(order=order)
+                    pdf_buffer = generate_invoice_pdf(order, ordered_products, payment)
+                    owner_email = 'rsb.grocery@gmail.com'  # Change to actual owner email
+                    owner_subject = f"New Order Received: {order.order_number}"
+                    owner_message = f"A new order has been placed. Please find the invoice attached.\nOrder Number: {order.order_number}\nCustomer: {order.full_name()}\nPhone: {order.phone}\nAddress: {order.full_address()}, {order.city}, {order.state}, {order.country}"
+                    email = EmailMessage(owner_subject, owner_message, to=[owner_email])
+                    email.attach(f"Invoice_{order.order_number}.pdf", pdf_buffer.read(), 'application/pdf')
+                    email.send()
+                    print("Owner notified with PDF invoice.")
+                except Exception as e:
+                    logger.error(f"Error sending owner invoice: {e}")
+                    print(f"Error sending owner invoice: {e}")
 
                 print("Payment and order processing completed successfully.")
 
@@ -204,3 +222,66 @@ def order_complete(request):
     except Payment.DoesNotExist:
         print(f"Payment with ID {transID} does not exist.")
         return redirect('home')
+
+def generate_invoice_pdf(order, ordered_products, payment):
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+    y = height - 50
+    
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(50, y, "Order Invoice")
+    y -= 30
+    p.setFont("Helvetica", 10)
+    p.drawString(50, y, f"Order Number: {order.order_number}")
+    y -= 15
+    p.drawString(50, y, f"Order Date: {order.created_at.strftime('%Y-%m-%d %H:%M')}")
+    y -= 15
+    p.drawString(50, y, f"Customer Name: {order.full_name()}")
+    y -= 15
+    p.drawString(50, y, f"Phone: {order.phone}")
+    y -= 15
+    p.drawString(50, y, f"Email: {order.email}")
+    y -= 15
+    p.drawString(50, y, f"Address: {order.full_address()}, {order.city}, {order.state}, {order.country}")
+    y -= 25
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(50, y, "Products:")
+    y -= 20
+    p.setFont("Helvetica", 10)
+    p.drawString(50, y, "Product Name")
+    p.drawString(250, y, "Qty")
+    p.drawString(300, y, "Price")
+    p.drawString(370, y, "Total")
+    y -= 15
+    p.line(50, y, 500, y)
+    y -= 10
+    subtotal = 0
+    for item in ordered_products:
+        if y < 100:
+            p.showPage()
+            y = height - 50
+        p.drawString(50, y, str(item.product.product_name))
+        p.drawString(250, y, str(item.quantity))
+        p.drawString(300, y, f"₹ {item.product_price}")
+        total = item.quantity * item.product_price
+        subtotal += total
+        p.drawString(370, y, f"₹ {total}")
+        y -= 15
+    y -= 10
+    p.line(50, y, 500, y)
+    y -= 20
+    p.drawString(300, y, "Subtotal:")
+    p.drawString(370, y, f"₹ {subtotal}")
+    y -= 15
+    p.drawString(300, y, "Tax:")
+    p.drawString(370, y, f"₹ {order.tax}")
+    y -= 15
+    p.drawString(300, y, "Grand Total:")
+    p.drawString(370, y, f"₹ {order.order_total}")
+    y -= 30
+    p.setFont("Helvetica-Oblique", 10)
+    p.drawString(50, y, "Thank you for your order!")
+    p.save()
+    buffer.seek(0)
+    return buffer
