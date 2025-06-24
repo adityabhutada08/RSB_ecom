@@ -5,165 +5,149 @@
 
 
 <section class="section-content padding-y bg">
-	<div class="container">
+    <div class="container">
 
-		<!-- ============================ COMPONENT 1 ================================= -->
-		<h4 class="text-center mb-20">Review Your Order and Make Payment</h4>
-		<div class="row">
+        <h4 class="text-center mb-20">Review Your Order and Make Payment</h4>
+        <div class="row">
 
-			<aside class="col-lg-8">
-				<div class="card">
-					<h5 class="card-header">Billing Address</h5>
-					<div class="card-body">
-						<p class="card-text mb-0">{{order.full_name}}</p>
-						<p class="card-text mb-0">{{order.full_address}}</p>
-						<p class="card-text mb-0">{{order.city}}, {{order.state}}</p>
-						<p class="card-text mb-0">{{order.country}}</p>
-						<p class="card-text mb-0">{{order.email}}</p>
-						<p class="card-text mb-0"><b>Phone No.</b> - {{order.phone}}</p>
-						{% if order.order_note %}
-						<b>Order Note: </b> {{order.order_note}}
-						{% endif %}
+            <aside class="col-lg-8">
+                <div class="card">
+                    <h5 class="card-header">Billing Address</h5>
+                    <div class="card-body">
+                        <p class="card-text mb-0">{{order.full_name}}</p>
+                        <p class="card-text mb-0">{{order.full_address}}</p>
+                        <p class="card-text mb-0">{{order.city}}, {{order.state}}</p>
+                        <p class="card-text mb-0">{{order.country}}</p>
+                        <p class="card-text mb-0">{{order.email}}</p>
+                        <p class="card-text mb-0"><b>Phone No.</b> - {{order.phone}}</p>
+                        {% if order.order_note %}
+                        <b>Order Note: </b> {{order.order_note}}
+                        {% endif %}
 
 
-					</div>
-				</div>
-				<div class="card">
-					<h5 class="card-header">Payment Method</h5>
-					<div class="card-body">
-						<p class="card-text">Online, UPI, QR Code, Net Banking, Wallet</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <h5 class="card-header">Payment Method</h5>
+                    <div class="card-body">
+                        <p class="card-text">Online, UPI, QR Code, Net Banking, Wallet</p>
 
-					</div>
-				</div>
-				<div class="card">
-					<h5 class="card-header">Review Products</h5>
-					<div class="card-body">
-						<table class="table table-borderless table-shopping-cart">
-							<thead class="text-muted">
-								<tr class="small text-uppercase">
-									<th scope="col">Product</th>
-									<th scope="col" width="120">Quantity</th>
-									<th scope="col" width="120">Price</th>
+                    </div>
+                </div>
+                <div class="card">
+                    <h5 class="card-header">Review Products</h5>
+                    <div class="card-body">
+                        <table class="table table-borderless table-shopping-cart">
+                            <thead class="text-muted">
+                                <tr class="small text-uppercase">
+                                    <th scope="col">Product</th>
+                                    <th scope="col" width="120">Quantity</th>
+                                    <th scope="col" width="120">Price</th>
 
-								</tr>
-							</thead>
-							<tbody>
+                                </tr>
+                            </thead>
+                            <tbody>
 
-								{% for cart_item in cart_items %}
-								<tr>
-									<td>
-										<figure class="itemside align-items-center">
-											<div class="aside"><img src="{{ cart_item.product.images.url }}" class="img-sm"></div>
-											<figcaption class="info">
-												<a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
-												<p class="text-muted small">
-													{% if cart_item.variations.all %}
-													{% for item in cart_item.variations.all %}
-													{{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }} <br>
-													{% endfor %}
-													{% endif %}
-												</p>
-											</figcaption>
-										</figure>
-									</td>
-									<td>
-										<!-- col.// -->
-										<span>{{cart_item.quantity}}</span>
-									</td>
-									<td>
-										<div class="price-wrap">
-											<var class="price">₹ {{ cart_item.sub_total }}</var>
-											<small class="text-muted">₹ {{ cart_item.product.price }} each </small>
-										</div> <!-- price-wrap .// -->
-									</td>
+                                {% for cart_item in cart_items %}
+                                <tr>
+                                    <td>
+                                        <figure class="itemside align-items-center">
+                                            <div class="aside"><img src="{{ cart_item.product.images.url }}" class="img-sm"></div>
+                                            <figcaption class="info">
+                                                <a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
+                                                <p class="text-muted small">
+                                                    {% if cart_item.variations.all %}
+                                                    {% for item in cart_item.variations.all %}
+                                                    {{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }} <br>
+                                                    {% endfor %}
+                                                    {% endif %}
+                                                </p>
+                                            </figcaption>
+                                        </figure>
+                                    </td>
+                                    <td>
+                                        <span>{{cart_item.quantity}}</span>
+                                    </td>
+                                    <td>
+                                        <div class="price-wrap">
+                                            <var class="price">₹ {{ cart_item.sub_total }}</var>
+                                            <small class="text-muted">₹ {{ cart_item.product.price }} each </small>
+                                        </div> </td>
 
-								</tr>
-								{% endfor %}
+                                </tr>
+                                {% endfor %}
 
-							</tbody>
-						</table>
+                            </tbody>
+                        </table>
 
-					</div>
-				</div>
+                    </div>
+                </div>
 
-			</aside> <!-- col.// -->
-			<aside class="col-lg-4">
+            </aside> <aside class="col-lg-4">
 
-				<div class="card">
-					<div class="card-body">
-						<dl class="dlist-align">
-							<dt>Total price:</dt>
-							<dd class="text-right">₹ {{total}}</dd>
-						</dl>
-						
-						<dl class="dlist-align">
+                <div class="card">
+                    <div class="card-body">
+                        <dl class="dlist-align">
+                            <dt>Total price:</dt>
+                            <dd class="text-right">₹ {{total}}</dd>
+                        </dl>
+                        
+                        <dl class="dlist-align">
                  
-							<dt data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Convenience Fees:
-								
-								<div class="dropdown-menu ">
-								  <option value="labour">Labour</option>
-							  <option value="labour">Delivery</option>
-							  <option value="labour">Packaging</option>
-							  <option value="labour">GST</option>
-								</div>
-							</dt>
-							<dd class="text-right">₹ {{ tax }}</dd>
-						  </dl>
+                            <dt data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Convenience Fees:
+                                
+                                <div class="dropdown-menu ">
+                                  <option value="labour">Labour</option>
+                              <option value="labour">Delivery</option>
+                              <option value="labour">Packaging</option>
+                              <option value="labour">GST</option>
+                                </div>
+                            </dt>
+                            <dd class="text-right">₹ {{ tax }}</dd>
+                          </dl>
 
-						<dl class="dlist-align">
-							<dt>Grand Total:</dt>
-							<dd class="text-right text-dark b"><strong>₹ {{grand_total}}</strong></dd>
-						</dl>
-						<hr>
-						<p class="text-center mb-3">
-							<img src="{% static './images/misc/payments.png' %}" height="26">
-						</p>
-
-
-						<div id="paypal-button-container">
-							{% comment %} PayPal Button Will Load {% endcomment %}
-							<form id="razorpay-form" method="post"> {% csrf_token %}
-								 <button id="rzp-button1" class="btn btn-primary btn-block" >Pay Now</button> 
-							</form>
-						</div>
-						
-
-					</div> <!-- card-body.// -->
-				</div> <!-- card.// -->
-
-			</aside> <!-- col.// -->
+                        <dl class="dlist-align">
+                            <dt>Grand Total:</dt>
+                            <dd class="text-right text-dark b"><strong>₹ {{grand_total}}</strong></dd>
+                        </dl>
+                        <hr>
+                        <p class="text-center mb-3">
+                            <img src="{% static './images/misc/payments.png' %}" height="26">
+                        </p>
 
 
-		</div> <!-- row.// -->
+                        <div id="paypal-button-container">
+                            {% comment %} PayPal Button Will Load {% endcomment %}
+                            <form id="razorpay-form" method="post"> {% csrf_token %}
+                                 <button id="rzp-button1" class="btn btn-primary btn-block" >Pay Now</button> 
+                            </form>
+                        </div>
+                        
 
-		<!-- ============================ COMPONENT 1 END .// ================================= -->
+                    </div> </div> </aside> </div> </div> </section>
 
-	</div> <!-- container .//  -->
-</section>
-
-<!-- ========================= SECTION CONTENT END// ========================= -->
- <!-- payments.html -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script> 
-	function getCookie(name) { 
-		let cookieValue = null; 
-		if (document.cookie && document.cookie !== '') { 
-			const cookies = document.cookie.split(';'); 
-			for (let i = 0; i < cookies.length; i++) { 
-				const cookie = cookies[i].trim();
-				if (cookie.substring(0, name.length + 1) === (name + '=')) { 
-					cookieValue = decodeURIComponent(cookie.substring(name.length + 1)); 
-					break;
-				 }
-				}
-		} 
-		return cookieValue; 
-	} 
-	const csrftoken = getCookie('csrftoken');
+    function getCookie(name) { 
+        let cookieValue = null; 
+        if (document.cookie && document.cookie !== '') { 
+            const cookies = document.cookie.split(';'); 
+            for (let i = 0; i < cookies.length; i++) { 
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) { 
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1)); 
+                    break;
+                 }
+                }
+        } 
+        return cookieValue; 
+    } 
+    const csrftoken = getCookie('csrftoken');
 
     var options = {
-        "key": "{{ rzp_test_BiGWKiQBtBzjNH }}", 
+        // CORRECTED LINE: Use the Django template variable for the Razorpay key
+        "key": "{{ razorpay_key }}", 
         "amount": "{{ grand_total }}", 
         "currency": "INR",
         "name": "RSB Grocery",
@@ -180,7 +164,7 @@
                     status: 'captured'
                 }),
                 contentType: "application/json",
-				headers: { 'X-CSRFToken': csrftoken },
+                headers: { 'X-CSRFToken': csrftoken },
                 success: function (response) {
                     window.location.href = "{% url 'order_complete' %}?order_number=" + response.order_number + "&payment_id=" + response.transID;
                 }

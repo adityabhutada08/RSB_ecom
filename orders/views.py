@@ -62,6 +62,9 @@ def place_order(request, total=0, quantity=0):
             data.save()
 
             # Create Razorpay Order
+            print(f"DEBUG: Using Razorpay Key ID: {settings.RAZORPAY_KEY_ID}")
+            print(f"DEBUG: Using Razorpay Secret Key: {settings.RAZORPAY_SECRET_KEY}")
+        
             razorpay_order = client.order.create({
                 "amount": int(grand_total * 100),
                 "currency": "INR",
