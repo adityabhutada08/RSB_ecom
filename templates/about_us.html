@@ -1,1 +1,50 @@
-<h1>This is About us page</h1>
+{% extends 'base.html' %}
+{% block content %}
+<section class="section-content padding-y bg">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-md-10">
+        <div class="card shadow-lg border-0 mb-4 mt-4">
+          <div class="card-body p-5">
+            <h2 class="text-center mb-4" style="font-family: 'Tasa', sans-serif; font-weight: 600;">A Legacy of Trust Since 1952</h2>
+            <p class="lead text-center mb-4">Welcome to our store—where tradition meets quality, and every customer is family.</p>
+            <hr>
+            <p class="mb-4">Founded in <strong>1952</strong>, our shop has been a cornerstone of the community for over seven decades. What began as a humble grain store has grown into a trusted destination for premium groceries, serving generations of families with pride and dedication.</p>
+            <div class="row mb-4">
+              <div class="col-md-6 mb-3 mb-md-0">
+                <div class="bg-light rounded p-3 h-100">
+                  <h4 class="text-success"><i class="fa fa-users"></i> Why Customers Prefer Us</h4>
+                  <p>Our customers choose us not just for our products, but for the <strong>trust</strong> we've built over the years. Many of our customers have been with us for decades, and their loyalty is our greatest achievement.</p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="bg-light rounded p-3 h-100">
+                  <h4 class="text-success"><i class="fa fa-star"></i> Our Promise: Only the Best</h4>
+                  <p>We specialize in <strong>all types of grains</strong>—wheat, rice, pulses, millets, and more—sourced from the finest producers. Every product is carefully selected for its quality, freshness, and nutritional value. <strong>Every item you take home is premium quality and good for your family.</strong></p>
+                </div>
+              </div>
+            </div>
+            <div class="mb-4">
+              <h4 class="text-primary"><i class="fa fa-leaf"></i> What Makes Us Unique</h4>
+              <ul class="list-unstyled ml-3">
+                <li><i class="fa fa-check-circle text-success"></i> <strong>Premium Quality, Always:</strong> Every product is handpicked and quality-checked.</li>
+                <li><i class="fa fa-check-circle text-success"></i> <strong>A Heritage of Excellence:</strong> Serving the community since 1952.</li>
+                <li><i class="fa fa-check-circle text-success"></i> <strong>All Grains, All Good:</strong> From everyday staples to specialty grains, we have it all.</li>
+                <li><i class="fa fa-check-circle text-success"></i> <strong>Trusted by Generations:</strong> Our reputation is built on decades of customer satisfaction.</li>
+                <li><i class="fa fa-check-circle text-success"></i> <strong>Personalized Service:</strong> We know our customers by name and treat everyone like family.</li>
+              </ul>
+            </div>
+            <div class="mb-4">
+              <h4 class="text-primary"><i class="fa fa-bullseye"></i> Our Mission</h4>
+              <p>To provide the highest quality groceries at fair prices, while upholding the values of trust, integrity, and community that have defined us since 1952.</p>
+            </div>
+            <div class="text-center mt-5">
+              <h5 class="font-weight-bold text-success">Thank you for making us your preferred grocery destination.<br>We look forward to serving you for generations to come!</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

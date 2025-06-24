@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="section-content padding-y bg">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10 col-md-12">
+        <div class="card shadow-lg border-0 mb-4 mt-4">
+          <div class="card-body p-5">
+            <h2 class="text-center mb-4" style="font-family: 'Tasa', sans-serif; font-weight: 600;">Refund & Return Policy</h2>
+            <!-- <p class="text-center text-muted mb-4">Last Updated: {{ now|date:'F d, Y' }}</p> -->
+            <hr>
+            <h4 class="text-primary mt-4 mb-3">1. Overview</h4>
+            <p>We want you to be completely satisfied with your purchase. If you are not happy with a product, our refund and return policy is designed to be fair, transparent, and customer-friendly, while also considering the nature of perishable goods.</p>
+            <h4 class="text-primary mt-4 mb-3">2. Eligibility for Returns & Refunds</h4>
+            <ul>
+              <li><strong>Perishable Items:</strong> Returns are accepted within <strong>24 hours</strong> of delivery/pickup if the product is spoiled, damaged, or not as described. Please contact us immediately with photos and details.</li>
+              <li><strong>Non-Perishable Items:</strong> Returns are accepted within <strong>7 days</strong> of delivery/pickup, provided the item is unused, unopened, and in its original packaging.</li>
+              <li><strong>Receipt Required:</strong> Please provide your order confirmation or receipt for all returns and refund requests.</li>
+            </ul>
+            <h4 class="text-primary mt-4 mb-3">3. How to Request a Return or Refund</h4>
+            <ol>
+              <li>Email us at <a href="mailto:rsb.grocery@gmail.com">rsb.grocery@gmail.com</a> with your order number, product details, reason for return, and supporting photos (if applicable).</li>
+              <li>Alternatively, call us at <a href="tel:+91 9422796555">+91 9422796555</a> during business hours.</li>
+              <li>Our team will review your request and provide instructions for return or next steps.</li>
+            </ol>
+            <h4 class="text-primary mt-4 mb-3">4. Refund Process & Timelines</h4>
+            <ul>
+              <li>Once your return is received and inspected, we will notify you of the approval or rejection of your refund.</li>
+              <li>Approved refunds will be processed within <strong>5-7 business days</strong> to your original payment method.</li>
+              <li>For cash on delivery orders, refunds will be issued as store credit or via bank transfer.</li>
+            </ul>
+            <h4 class="text-primary mt-4 mb-3">5. Exchanges</h4>
+            <p>We offer exchanges for eligible items if you receive a defective or incorrect product. Please contact us within the return window to arrange an exchange.</p>
+            <h4 class="text-primary mt-4 mb-3">6. Exceptions & Non-Returnable Items</h4>
+            <ul>
+              <li>Products that are opened, used, or not in their original condition are not eligible for return.</li>
+              <li>Perishable items purchased in excess or by mistake (wrong variety, flavor, size, etc.) are not eligible for return due to food safety and environmental concerns.</li>
+              <li>Gift cards, promotional items, and items marked as "final sale" are non-returnable.</li>
+            </ul>
+            <h4 class="text-primary mt-4 mb-3">7. Customer Rights & Dispute Resolution</h4>
+            <p>If you are dissatisfied with our resolution, please contact us directly. We are committed to resolving all issues fairly and promptly.</p>
+            <h4 class="text-primary mt-4 mb-3">8. Contact Information</h4>
+            <ul>
+              <li>Email: <a href="mailto:rsb.grocery@gmail.com">rsb.grocery@gmail.com</a></li>
+              <li>Phone: <a href="tel:+91 9422796555">+91 9422796555</a></li>
+              <li>Visit our <a href="{% url 'contact_us' %}">Contact Us</a> page for more options.</li>
+            </ul>
+            <hr>
+            <p class="text-muted small">We reserve the right to update this policy at any time. Please review this page regularly for any changes.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %} 

@@ -1,1 +1,42 @@
-<h1>This is cancellation_policy</h1>
+{% extends 'base.html' %}
+{% block content %}
+<section class="section-content padding-y bg">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10 col-md-12">
+        <div class="card shadow-lg border-0 mb-4 mt-4">
+          <div class="card-body p-5">
+            <h2 class="text-center mb-4" style="font-family: 'Tasa', sans-serif; font-weight: 600;">Cancellation Policy</h2>
+            <!-- <p class="text-center text-muted mb-4">Last Updated: {{ now|date:'F d, Y' }}</p> -->
+            <hr>
+            <h4 class="text-primary mt-4 mb-3">1. Overview</h4>
+            <p>We understand that plans can change. Our cancellation policy is designed to be fair to both our valued customers and our business, ensuring smooth operations and minimizing waste, especially for perishable goods.</p>
+            <h4 class="text-primary mt-4 mb-3">2. Notice Period</h4>
+            <p>To cancel or modify your order, please notify us at least <strong>24 hours</strong> before your scheduled delivery or pickup. Cancellations made with less than 24 hours' notice may not be eligible for a full refund, especially for perishable items already prepared or dispatched.</p>
+            <h4 class="text-primary mt-4 mb-3">3. How to Cancel</h4>
+            <ul>
+              <li>Online Orders: Log in to your account, go to "My Orders," and select the order you wish to cancel. If the cancellation option is unavailable, please contact us directly.</li>
+              <li>Email: Send your cancellation request to <a href="mailto:rsb.grocery@gmail.com">rsb.grocery@gmail.com</a> with your order number and contact details.</li>
+              <li>Phone: Call us at <a href="tel:+91 9422796555">+91 9422796555</a> during business hours.</li>
+            </ul>
+            <h4 class="text-primary mt-4 mb-3">4. Cancellation Fees</h4>
+            <p>Orders cancelled with less than 24 hours' notice may be subject to a cancellation fee of up to 50% of the order value, especially for perishable or custom-prepared items. No-shows or cancellations after dispatch are not eligible for a refund.</p>
+            <h4 class="text-primary mt-4 mb-3">5. Exceptions & Emergencies</h4>
+            <p>We understand that emergencies happen. Please contact us as soon as possible if you need to cancel due to unforeseen circumstances. We review such cases individually and strive to be as accommodating as possible.</p>
+            <h4 class="text-primary mt-4 mb-3">6. Rescheduling</h4>
+            <p>If you need to reschedule your order, please contact us at least 24 hours in advance. We will do our best to accommodate your new preferred date and time.</p>
+            <h4 class="text-primary mt-4 mb-3">7. Contact Information</h4>
+            <ul>
+              <li>Email: <a href="mailto:rsb.grocery@gmail.com">rsb.grocery@gmail.com</a></li>
+              <li>Phone: <a href="tel:+91 9422796555">+91 9422796555</a></li>
+              <li>Visit our <a href="{% url 'contact_us' %}">Contact Us</a> page for more options.</li>
+            </ul>
+            <hr>
+            <p class="text-muted small">We reserve the right to update this policy at any time. Please review this page regularly for any changes.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

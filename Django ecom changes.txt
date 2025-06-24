@@ -1,6 +1,6 @@
 1 . paginator from the store. views  in if else code block
 
-
+@@@@@@@@------TAX of Razorpay with platform fees is 2.37% -------@@@@@@@
 
 new commit to add in git
 

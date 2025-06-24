@@ -1,1 +1,75 @@
-<h1>This is privacy_policy</h1>
+{% extends 'base.html' %}
+{% block content %}
+<section class="section-content padding-y bg">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-10 col-md-12">
+        <div class="card shadow-lg border-0 mb-4 mt-4">
+          <div class="card-body p-5">
+            <h2 class="text-center mb-4" style="font-family: 'Tasa', sans-serif; font-weight: 600;">Privacy Policy</h2>
+            <!-- <p class="text-center text-muted mb-4">Last Updated: {{ now|date:'F d, Y' }}</p> -->
+            <hr>
+            <h4 class="text-primary mt-4 mb-3">1. Introduction</h4>
+            <p>We value your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our services.</p>
+
+            <h4 class="text-primary mt-4 mb-3">2. Information We Collect</h4>
+            <ul>
+              <li><strong>Personal Information:</strong> Name, email address, phone number, address, and other information you provide when you register, place an order, or contact us.</li>
+              <li><strong>Order & Payment Data:</strong> Details of your purchases and payment information (processed securely by third-party payment processors).</li>
+              <li><strong>Usage Data:</strong> Information about how you use our website, including IP address, browser type, device information, and pages visited.</li>
+              <li><strong>Cookies & Tracking:</strong> We use cookies and similar technologies to enhance your experience, analyze site usage, and deliver personalized content and ads.</li>
+            </ul>
+
+            <h4 class="text-primary mt-4 mb-3">3. How We Use Your Information</h4>
+            <ul>
+              <li>To process and fulfill your orders</li>
+              <li>To communicate with you about your orders, account, or inquiries</li>
+              <li>To improve our website, products, and services</li>
+              <li>To send you updates, offers, and marketing communications (you can opt out anytime)</li>
+              <li>To comply with legal obligations and protect our rights</li>
+            </ul>
+
+            <h4 class="text-primary mt-4 mb-3">4. Sharing Your Information</h4>
+            <ul>
+              <li>We do <strong>not</strong> sell or rent your personal information to third parties.</li>
+              <li>We may share your information with trusted service providers (e.g., payment processors, delivery partners) who help us operate our business, but only as necessary and under strict confidentiality agreements.</li>
+              <li>We may disclose information if required by law or to protect our rights, property, or safety.</li>
+            </ul>
+
+            <h4 class="text-primary mt-4 mb-3">5. Cookies & Tracking Technologies</h4>
+            <p>We use cookies and similar technologies to personalize your experience, analyze traffic, and provide relevant advertising. You can control cookies through your browser settings, but disabling cookies may affect site functionality.</p>
+
+            <h4 class="text-primary mt-4 mb-3">6. Data Security</h4>
+            <p>We implement reasonable security measures to protect your information from unauthorized access, alteration, disclosure, or destruction. However, no method of transmission over the Internet or electronic storage is 100% secure.</p>
+
+            <h4 class="text-primary mt-4 mb-3">7. Your Rights & Choices</h4>
+            <ul>
+              <li>You can access, update, or delete your personal information by contacting us.</li>
+              <li>You can opt out of marketing emails at any time by using the unsubscribe link in our emails.</li>
+              <li>You can control cookies and tracking through your browser settings.</li>
+            </ul>
+
+            <h4 class="text-primary mt-4 mb-3">8. Children's Privacy</h4>
+            <p>Our website and services are not intended for children under 16. We do not knowingly collect personal information from children. If you believe a child has provided us with personal information, please contact us and we will promptly delete it.</p>
+
+            <h4 class="text-primary mt-4 mb-3">9. Changes to This Policy</h4>
+            <p>We may update this Privacy Policy from time to time. Any changes will be posted on this page with an updated effective date. Your continued use of our website after changes are posted constitutes your acceptance of those changes.</p>
+
+            <h4 class="text-primary mt-4 mb-3">10. Contact Us</h4>
+            <p>If you have any questions, concerns, or requests regarding this Privacy Policy or your personal information, please contact us:</p>
+            <ul>
+              <li><strong>Email:</strong> <a href="mailto:rsb.grocery@gmail.com">rsb.grocery@gmail.com</a></li>
+              <li><strong>Phone:</strong><a href="tel:+91 9422796555">+91 9422796555</a></li>
+              <li>Visit our <a href="{% url 'contact_us' %}">Contact Us</a> page for more options.</li>
+            </ul>
+
+            <div class="text-center mt-5">
+              <h6 class="text-muted">Thank you for trusting us with your information. We are committed to protecting your privacy and providing a safe shopping experience.</h6>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

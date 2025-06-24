@@ -33,6 +33,7 @@ urlpatterns = [
     path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
     path('terms-conditions/', views.terms_conditions, name='terms_conditions'),
     path('cancellation-policy/', views.cancellation_policy, name='cancellation_policy'),
+    path('refund-policy/', views.refund_policy, name='refund_policy'),
 
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
