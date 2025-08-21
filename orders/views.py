@@ -285,3 +285,42 @@ def generate_invoice_pdf(order, ordered_products, payment):
     p.save()
     buffer.seek(0)
     return buffer
+
+
+
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+import io
+from .models import Order, OrderProduct
+
+def download_invoice(request, order_id):
+    try:
+        order = Order.objects.get(order_number=order_id, is_ordered=True)
+        order_detail = OrderProduct.objects.filter(order_id=order.id)
+
+        template_path = 'orders/invoice_pdf.html'  # separate clean template for PDF
+        context = {
+            'order': order,
+            'order_detail': order_detail,
+            'subtotal': sum(item.product_price * item.quantity for item in order_detail),
+        }
+
+        # Render HTML
+        template = get_template(template_path)
+        html = template.render(context)
+
+        # Create a PDF
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="invoice_{order.order_number}.pdf"'
+
+        pisa_status = pisa.CreatePDF(
+            io.BytesIO(html.encode("UTF-8")),
+            dest=response,
+            encoding='UTF-8'
+        )
+        if pisa_status.err:
+            return HttpResponse('We had some errors while generating the PDF')
+        return response
+    except Order.DoesNotExist:
+        return HttpResponse("Order not found.")

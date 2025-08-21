@@ -1,58 +1,75 @@
 {% load static %}
 
 <!-- ========================= FOOTER ========================= -->
-<footer class="section-footer border-top">
-    <div class="container">
-        <section class="footer-bottom border-top row">
-            <div class="col-md-2">
-                <p class="text-muted"> &copy; 2025 RSB Grocery </p>
-            </div>
-            <div class="col-md-8 text-md-center">
-                <div class="h-100 d-inline-flex align-items-center me-4 mb-3">
-                    <i class="fa fa-envelope text-primary me-2"></i>
-                    <a href="mailto:rsb.grocery@gmail.com" onclick="sendMail()" style="color: rgb(75, 73, 73); margin-right: 20px;">
-                        &nbsp;rsb.grocery@gmail.com
-                    </a>
-                </div>
+<footer class="section-footer border-top bg-light pt-3">
+  <div class="container">
+    
+    <section class="footer-links text-center">
+        <ul class="list-inline mb-2">
+          <li class="list-inline-item mb-2">
+            <a href="{% url 'about_us' %}" class="text-decoration-none text-dark">About Us</a>
+          </li>
+          <li class="list-inline-item mb-2">
+            <a href="{% url 'contact_us' %}" class="text-decoration-none text-dark">Contact Us</a>
+          </li>
+          <li class="list-inline-item mb-2">
+            <a href="{% url 'privacy_policy' %}" class="text-decoration-none text-dark">Privacy Policy</a>
+          </li>
+          <li class="list-inline-item mb-2">
+            <a href="{% url 'terms_conditions' %}" class="text-decoration-none text-dark">Terms & Conditions</a>
+          </li>
+          <li class="list-inline-item mb-2">
+            <a href="{% url 'cancellation_policy' %}" class="text-decoration-none text-dark">Cancellation Policy</a>
+          </li>
+          <li class="list-inline-item mb-2">
+            <a href="{% url 'refund_policy' %}" class="text-decoration-none text-dark">Refund & Return Policy</a>
+          </li>
+        </ul>
+      </section>
 
-                <div class="h-100 d-inline-flex align-items-center me-4 mb-3">
-                    <i class="fa fa-phone text-primary me-2"></i>
-                    <a href="tel:+91 9422796555" onclick="makeCall()" style="color: rgb(75, 73, 73);margin-right: 20px;">&nbsp;
-                        +91 9422796555
-                    </a>
-                </div>
+      
+      <hr>
 
-                <div class="h-100 d-inline-flex align-items-center me-4 mb-3">
-                    <i class="fa fa-map-marker text-primary me-2"></i>
-                    <a href="https://maps.app.goo.gl/C9Kq3oFbY2oDNinTA" target="_blank" style="color: rgb(75, 73, 73);">&nbsp;
-                        New Mondha, Partur
-                    </a>
-                </div>
-            </div>
-        </section>
-        <hr>
-        <section class="footer-links text-md-center">
-            <ul class="list-inline">
-                <li class="list-inline-item">
-                    <a href="{% url 'about_us' %}" style="color: rgb(75, 73, 73);">About Us</a>
-                </li>
-                <li class="list-inline-item">
-                    <a href="{% url 'contact_us' %}" style="color: rgb(75, 73, 73);">Contact Us</a>
-                </li>
-                <li class="list-inline-item">
-                    <a href="{% url 'privacy_policy' %}" style="color: rgb(75, 73, 73);">Privacy Policy</a>
-                </li>
-                <li class="list-inline-item">
-                    <a href="{% url 'terms_conditions' %}" style="color: rgb(75, 73, 73);">Terms & Conditions</a>
-                </li>
-                <li class="list-inline-item">
-                    <a href="{% url 'cancellation_policy' %}" style="color: rgb(75, 73, 73);">Cancellation Policy</a>
-                </li>
-                <li class="list-inline-item">
-                    <a href="{% url 'refund_policy' %}" style="color: rgb(75, 73, 73);">Refund & Return Policy</a>
-                </li>
-            </ul>
-        </section>
-    </div><!-- //container -->
+
+    <!-- Top Row -->
+    <section class="footer-bottom row text-center text-md-start align-items-center py-2">
+      <!-- Left copyright -->
+      <div class="col-12 col-md-3 mb-2 mb-md-0">
+        <p class="text-muted mb-0">&copy; 2025 RSB Grocery</p>
+      </div>
+
+      <!-- Center contact info -->
+      <div class="col-12 col-md-6 d-flex flex-column flex-md-row justify-content-center align-items-center gap-3">
+        <div class="d-flex align-items-center">
+          <i class="fa fa-envelope text-primary me-2"></i>
+          <a href="mailto:rsb.grocery@gmail.com" class="text-decoration-none text-dark">
+            rsb.grocery@gmail.com &nbsp;
+          </a>
+        </div>
+
+        <div class="d-flex align-items-center">
+          <i class="fa fa-phone text-primary me-2"></i>
+          <a href="tel:+91 9422796555" class="text-decoration-none text-dark">
+            +91 9422796555  &nbsp;
+          </a>
+        </div>
+
+        <div class="d-flex align-items-center">
+          <i class="fa fa-map-marker text-primary me-2"></i>
+          <a href="https://maps.app.goo.gl/C9Kq3oFbY2oDNinTA" target="_blank" class="text-decoration-none text-dark">
+            New Mondha, Partur &nbsp;
+          </a>
+        </div>
+      </div>
+
+      <!-- Right empty (or social icons later) -->
+      <div class="col-12 col-md-3 text-center text-md-end mt-2 mt-md-0">
+        <small class="text-muted"> &copy; All Rights Reserved</small>
+      </div>
+    </section>
+
+    <!-- Bottom Links -->
+    
+  </div>
 </footer>
 <!-- ========================= FOOTER END // ========================= -->

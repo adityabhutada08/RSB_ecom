@@ -6,10 +6,12 @@ from django.db.models import Q
 
 from carts.views import _cart_id
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .forms import ReviewForm
 from django.contrib import messages
 from orders.models import OrderProduct
+from django.contrib.auth.decorators import user_passes_test, login_required
+from django.views.decorators.http import require_POST
 
 # Create your views here.
 def store(request, category_slug=None):
@@ -37,6 +39,108 @@ def store(request, category_slug=None):
         'product_count': product_count,
     }
     return render(request, 'store/store.html', context)
+
+
+# Admin-only price manager
+def _is_staff_user(user):
+    return user.is_authenticated and (user.is_staff or user.is_superadmin or user.is_admin)
+
+
+@user_passes_test(_is_staff_user)
+def price_manager(request):
+    query = request.GET.get('q', '')  # Get search query
+    products = Product.objects.all().order_by('id')
+
+    if query:
+        products = products.filter(product_name__icontains=query)  # Case-insensitive search
+
+    context = {
+        'products': products,
+        'query': query,
+    }
+    return render(request, 'store/price_manager.html', context)
+
+
+@login_required
+@require_POST
+def update_product_price(request):
+    if not _is_staff_user(request.user):
+        return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
+
+    try:
+        product_id = int(request.POST.get('product_id'))
+        new_price = request.POST.get('price')
+        if new_price is None:
+            return JsonResponse({'success': False, 'message': 'Price is required'}, status=400)
+        try:
+            new_price_int = int(new_price)
+        except ValueError:
+            return JsonResponse({'success': False, 'message': 'Invalid price'}, status=400)
+        if new_price_int < 0:
+            return JsonResponse({'success': False, 'message': 'Price must be positive'}, status=400)
+
+        product = Product.objects.get(id=product_id)
+        product.price = new_price_int
+        product.save(update_fields=['price', 'modified_date'])
+        return JsonResponse({'success': True, 'product_id': product.id, 'price': product.price})
+    except Product.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Product not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': 'Server error'}, status=500)
+
+
+
+# ------------------------
+# Admin-only Stock Manager
+# ------------------------
+
+@user_passes_test(_is_staff_user)
+def stock_manager(request):
+    query = request.GET.get('q', '')  # Get search query
+    products = Product.objects.all().order_by('id')
+
+    if query:
+        products = products.filter(product_name__icontains=query)  # Case-insensitive search
+
+    context = {
+        'products': products,
+        'query': query,
+    }
+    return render(request, 'store/stock_manager.html', context)
+
+
+@login_required
+@require_POST
+def update_product_stock(request):
+    if not _is_staff_user(request.user):
+        return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
+
+    try:
+        product_id = int(request.POST.get('product_id'))
+        new_stock = request.POST.get('stock')
+
+        if new_stock is None:
+            return JsonResponse({'success': False, 'message': 'Stock is required'}, status=400)
+
+        try:
+            new_stock_int = int(new_stock)
+        except ValueError:
+            return JsonResponse({'success': False, 'message': 'Invalid stock value'}, status=400)
+
+        if new_stock_int < 0:
+            return JsonResponse({'success': False, 'message': 'Stock must be non-negative'}, status=400)
+
+        product = Product.objects.get(id=product_id)
+        product.stock = new_stock_int
+        product.save(update_fields=['stock', 'modified_date'])
+
+        return JsonResponse({'success': True, 'product_id': product.id, 'stock': product.stock})
+    except Product.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Product not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': 'Server error'}, status=500)
+
+
 
 
 

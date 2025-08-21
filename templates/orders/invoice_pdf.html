@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #000; padding: 5px; text-align: center; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+    </style>
+</head>
+<body>
+    <h2 style="text-align:center;">Invoice</h2>
+    <p><strong>Order:</strong> #{{order.order_number}}</p>
+    <p><strong>Date:</strong> {{order.created_at}}</p>
+    <p><strong>Status:</strong> {{order.payment.status}}</p>
+
+    <p><strong>Invoiced To:</strong> {{order.full_name}}, {{order.full_address}}, {{order.city}}, {{order.state}}, {{order.country}}</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Products</th>
+                <th>Qty</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for item in order_detail %}
+            <tr>
+                <td>{{item.product.product_name}}</td>
+                <td>{{item.quantity}}</td>
+                <td>₹ {{item.product_price}} INR</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="2" class="text-right">Sub Total</th>
+                <th>₹ {{subtotal}} INR</th>
+            </tr>
+            <tr>
+                <th colspan="2" class="text-right">Convenience Fees</th>
+                <th>₹ {{order.tax}} INR</th>
+            </tr>
+            <tr>
+                <th colspan="2" class="text-right">Grand Total</th>
+                <th> &#8377; {{order.order_total}} INR</th>
+            </tr>
+        </tfoot>
+    </table>
+
+    <p style="text-align:center; margin-top:20px;">Thank you for shopping with us!</p>
+</body>
+</html>

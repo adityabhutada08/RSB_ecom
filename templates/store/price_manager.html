@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="section-content padding-y bg">
+  <div class="container">
+    <h2 class="mb-4">Product Price Manager Page</h2>
+
+    
+    {% if user.is_staff or user.is_superadmin or user.is_admin %}
+    <a href="{% url 'price_manager' %}" class="btn btn-primary btn-lg">Manage Prices</a> &nbsp;
+    <a href="{% url 'stock_manager' %}" class="btn btn-primary btn-lg">Manage Stock</a> <br> <br>
+    {% endif %}
+
+    <div class="card">
+      <div class="card-body">
+
+        <div class="mb-3">
+          <form method="get" class="d-flex" action="{% url 'price_manager' %}">
+            <input 
+              type="text" 
+              name="q" 
+              class="form-control me-2" 
+              placeholder="Search product..." 
+              value="{{ query }}"
+            >
+            <button type="submit" class="btn btn-outline-primary">Search</button>
+          </form>
+        </div>
+        
+        <!-- Laptop/tablet view -->
+        <div class="table-responsive d-none d-md-block">
+          <table class="table table-striped" id="productTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Image</th>
+                <th class="sortable" data-sort="name">Product <span class="sort-indicator">⇅</span></th>
+
+                <th>Category</th>
+                <th class="sortable" data-sort="price">Current Price (₹) <span class="sort-indicator">⇅</span></th>
+                <th>New Price (₹)</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in products %}
+              <tr data-product-id="{{ p.id }}">
+                <td>{{ p.id }}</td>
+                <td>
+                  <img src="{{ p.images.url }}" alt="{{ p.product_name }}" class="img-thumbnail" style="width:60px; height:60px;">
+                </td>
+                <td>{{ p.product_name }}</td>
+                <td>{{ p.category.category_name }}</td>
+                <td class="current-price">{{ p.price }}</td>
+                <td>
+                  <input type="number" class="form-control form-control-sm price-input" value="{{ p.price }}" min="0" step="1" />
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-primary update-price-btn">Update</button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Mobile-friendly card view -->
+        <div class="d-md-none">
+          {% for p in products %}
+          <div class="card mb-2" data-product-id="{{ p.id }}">
+            <div class="card-body d-flex align-items-center">
+              <img src="{{ p.images.url }}" alt="{{ p.product_name }}" class="img-thumbnail me-3" style="width:60px; height:60px;">
+              <div class="flex-grow-1">
+
+
+
+
+              <h6 class="card-title">{{ p.product_name }}</h6>
+              <p class="mb-1"><strong>Category:</strong> {{ p.category.category_name }}</p>
+              <p class="mb-1"><strong>Current Price:</strong> ₹<span class="current-price">{{ p.price }}</span></p>
+        
+              <div class="d-flex">
+                <input type="number" class="form-control form-control-sm price-input me-2" value="{{ p.price }}" min="0" step="1" />
+                <button class="btn btn-sm btn-primary update-price-btn">Update</button>
+              </div>
+            </div>
+          </div>
+          </div>
+          {% endfor %}
+        </div>
+        
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  document.addEventListener('click', async function (e) {
+    if (e.target && e.target.classList.contains('update-price-btn')) {
+      // support both table row and card view
+      const container = e.target.closest('tr') || e.target.closest('.card');
+      const productId = container.getAttribute('data-product-id');
+      const input = container.querySelector('.price-input');
+      const newPrice = input.value;
+
+      e.target.disabled = true;
+      e.target.textContent = 'Saving...';
+
+      try {
+        const formData = new FormData();
+        formData.append('product_id', productId);
+        formData.append('price', newPrice);
+
+        const res = await fetch('{% url "update_product_price" %}', {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrftoken },
+          body: formData
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          container.querySelector('.current-price').textContent = data.price;
+
+          // Show ✅ tick temporarily
+          e.target.innerHTML = '✅ Updated';
+          e.target.classList.remove('btn-primary');
+          e.target.classList.add('btn-success');
+
+          setTimeout(() => {
+            e.target.innerHTML = 'Update';
+            e.target.classList.remove('btn-success');
+            e.target.classList.add('btn-primary');
+          }, 3000);
+        } else {
+          alert(data.message || 'Failed to update price');
+          e.target.textContent = 'Update';
+        }
+      } catch (err) {
+        alert('Network error');
+        e.target.textContent = 'Update';
+      } finally {
+        e.target.disabled = false;
+      }
+    }
+  });
+
+
+  document.addEventListener("DOMContentLoaded", function() {
+  const table = document.getElementById("productTable");
+  const headers = table.querySelectorAll(".sortable");
+  let sortDirection = {};
+
+  headers.forEach(header => {
+    header.addEventListener("click", function() {
+      const column = header.getAttribute("data-sort"); // "price", "stock", "name"
+      const tbody = table.querySelector("tbody");
+      const rows = Array.from(tbody.querySelectorAll("tr"));
+
+      // Toggle sort direction for this column
+      sortDirection[column] = !sortDirection[column];
+
+      rows.sort((a, b) => {
+        let aValue, bValue;
+
+        if (column === "price") {
+          aValue = parseFloat(a.querySelector(".current-price")?.innerText || 0);
+          bValue = parseFloat(b.querySelector(".current-price")?.innerText || 0);
+        } else if (column === "stock") {
+          aValue = parseFloat(a.querySelector(".current-stock")?.innerText || 0);
+          bValue = parseFloat(b.querySelector(".current-stock")?.innerText || 0);
+        } else if (column === "name") {
+          aValue = a.querySelector("td:nth-child(3)").innerText.trim().toLowerCase();
+          bValue = b.querySelector("td:nth-child(3)").innerText.trim().toLowerCase();
+        }
+
+        if (typeof aValue === "string") {
+          return sortDirection[column] ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+        } else {
+          return sortDirection[column] ? aValue - bValue : bValue - aValue;
+        }
+      });
+
+      // Clear and append sorted rows
+      tbody.innerHTML = "";
+      rows.forEach(row => tbody.appendChild(row));
+
+      // Reset indicators
+      headers.forEach(h => h.querySelector(".sort-indicator").textContent = "⇅");
+      header.querySelector(".sort-indicator").textContent = sortDirection[column] ? "↑" : "↓";
+    });
+  });
+});
+
+</script>
+
+{% endblock %}
