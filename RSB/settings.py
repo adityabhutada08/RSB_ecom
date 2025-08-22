@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'carts',
     'orders',
     'admin_thumbnails',
+    "crispy_forms",
+    "crispy_bootstrap5",
 
 ]
 
@@ -170,3 +172,8 @@ RAZORPAY_SECRET_KEY = config('RAZORPAY_SECRET_KEY')
 
 print("RAZORPAY_KEY_ID:", RAZORPAY_KEY_ID)
 print("RAZORPAY_SECRET_KEY:", RAZORPAY_SECRET_KEY)
+
+
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"

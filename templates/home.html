@@ -23,7 +23,8 @@
 	
 	{% if user.is_staff or user.is_superadmin or user.is_admin %}
 	<a href="{% url 'price_manager' %}" class="btn btn-primary btn-lg">Manage Prices</a> &nbsp;
-	<a href="{% url 'stock_manager' %}" class="btn btn-primary btn-lg">Manage Stock</a> <br> <br>
+	<a href="{% url 'stock_manager' %}" class="btn btn-primary btn-lg">Manage Stock</a> &nbsp;
+	<a href="{% url 'add_category' %}" class="btn btn-primary btn-lg">+ Add Category</a><br> <br>
 	{% endif %}
 
 
