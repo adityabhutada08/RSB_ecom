@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h2 class="mb-0">Add New Category</h2>
+    </div>
+    <div class="card-body">
+      <form method="POST" enctype="multipart/form-data" class="needs-validation">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success w-100">Add Category</button>
+      </form>
+    </div>
+  </div>
+
+  <br><br>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+      <h2 class="mb-0">List of all Categories</h2>
+      
+    </div>
+
+    <div class="card-body">
+      {% if categories %}
+      <div class="table-responsive">
+
+        <div class="mb-3">
+            <input type="text" id="category-search" class="form-control" placeholder="Search categories by name...">
+          </div>
+          
+        <table class="table table-striped table-hover align-middle">
+          <thead>
+              <tr>
+                <th>Image</th>
+              <th><div>
+                <a href="#" class="btn btn-primary btn-sm sort-btn" data-sort="name_asc" id="sort-asc">Name ↑</a>
+                <a href="#" class="btn btn-primary btn-sm sort-btn" data-sort="name_desc" id="sort-desc">↓</a>
+              </div></th>
+              <th>Slug</th>
+              <th>Description</th>
+              <th style="width:120px;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="category-table-body">
+            {% for cat in categories %}
+            <tr id="cat-row-{{ cat.id }}">
+                <td>
+                    {% if cat.category_img %}
+                      <img src="{{ cat.category_img.url }}" alt="{{ cat.category_name }}" class="img-thumbnail" style="max-width: 80px;">
+                    {% else %}
+                      <span class="text-muted">No Image</span>
+                    {% endif %}
+                  </td>
+              <td>{{ cat.category_name }}</td>
+              <td>{{ cat.slug }}</td>
+              <td>{{ cat.category_description|truncatewords:10 }}</td>
+              
+              <td>
+                <button
+                  class="btn btn-danger btn-sm delete-btn"
+                  data-url="{% url 'category:delete_category' cat.id %}"
+                  data-id="{{ cat.id }}"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <p class="text-muted mb-0" id="no-categories-message">No categories added yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // CSRF token setup for AJAX requests
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+                const cookies = document.cookie.split(";");
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = jQuery.trim(cookies[i]);
+                    if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie("csrftoken");
+
+        // Function to render table rows from JSON data
+        function renderCategories(categories) {
+            const tableBody = $('#category-table-body');
+            tableBody.empty();
+            if (categories.length === 0) {
+                $('#no-categories-message').show();
+            } else {
+                $('#no-categories-message').hide();
+                categories.forEach(cat => {
+                    const row = `<tr id="cat-row-${cat.id}">
+                        <td>
+                            ${cat.category_img ? `<img src="${cat.category_img}" alt="${cat.category_name}" class="img-thumbnail" style="max-width: 80px;">` : `<span class="text-muted">No Image</span>`}
+                        </td>
+                        <td>${cat.category_name}</td>
+                        <td>${cat.slug}</td>
+                        <td>${cat.category_description.length > 50 ? cat.category_description.substring(0, 50) + '...' : cat.category_description}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm delete-btn" data-url="/category/delete/${cat.id}/" data-id="${cat.id}">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>`;
+                    tableBody.append(row);
+                });
+            }
+        }
+
+        // Handle AJAX sorting
+        $('.sort-btn').on('click', function(e) {
+            e.preventDefault();
+            const sortValue = $(this).data('sort');
+            const url = `?sort=${sortValue}`;
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                },
+                success: function(response) {
+                    if (response.categories) {
+                        renderCategories(response.categories);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#alert-container').html(`
+                        <div class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+                            ❌ Failed to sort categories.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `);
+                }
+            });
+        });
+
+        // Client-side search
+        $('#category-search').on('keyup', function() {
+            const query = $(this).val().toLowerCase();
+            $('#category-table-body tr').filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(query) > -1);
+            });
+
+            const visibleRows = $('#category-table-body tr:visible').length;
+            if (visibleRows === 0) {
+                if ($('#no-search-results').length === 0) {
+                    $('#category-table-body').append('<tr id="no-search-results"><td colspan="5" class="text-center text-muted">No matching categories found.</td></tr>');
+                }
+            } else {
+                $('#no-search-results').remove();
+            }
+        });
+
+        // Event delegation for AJAX deletion
+        $('#category-table-body').on('click', '.delete-btn', function(e) {
+            const btn = $(this);
+            const rowId = btn.data("id");
+            const url = btn.data("url");
+            if (!confirm("Are you sure you want to delete this category?")) return;
+
+            btn.prop('disabled', true).text("Deleting...");
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                headers: {
+                    "X-CSRFToken": csrftoken
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        $(`#cat-row-${rowId}`).remove();
+                        if ($('#category-table-body tr').length === 0) {
+                            $('#no-categories-message').show();
+                        }
+
+                        $('#alert-container').html(`
+                            <div class="alert alert-success alert-dismissible fade show mt-2" role="alert">
+                                🗑️ Category deleted successfully!
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        `);
+                        setTimeout(() => { $('.alert').alert('close'); }, 3000);
+                    } else {
+                        $('#alert-container').html(`
+                            <div class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+                                ❌ ${response.error || "Failed to delete category."}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        `);
+                        btn.prop('disabled', false).text("Delete");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#alert-container').html(`
+                        <div class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+                            ❌ Network error while deleting.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `);
+                    btn.prop('disabled', false).text("Delete");
+                }
+            });
+        });
+
+        // AJAX form submission for adding a category
+        $('#add-category-form').on('submit', function(e) {
+            e.preventDefault();
+            const form = $(this);
+            const formData = new FormData(this);
+            const submitBtn = form.find('button[type="submit"]');
+            submitBtn.prop('disabled', true).text('Adding...');
+            $('#form-errors').html('');
+
+            $.ajax({
+                url: form.attr('action') || window.location.href,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    "X-CSRFToken": csrftoken,
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                success: function(response) {
+                    if (response.success) {
+                        form.trigger("reset");
+                        loadCategories();
+
+                        $('#alert-container').html(`
+                            <div class="alert alert-success alert-dismissible fade show mt-2" role="alert">
+                                ✅ Category added successfully!
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        `);
+                        setTimeout(() => { $('.alert').alert('close'); }, 3000);
+                    } else {
+                        $('#alert-container').html(`
+                            <div class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+                                ❌ ${response.error || "Failed to add category."}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        `);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#alert-container').html(`
+                        <div class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+                            ❌ Network or server error.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    `);
+                },
+                complete: function() {
+                    submitBtn.prop('disabled', false).text('Add Category');
+                }
+            });
+        });
+
+        // Function to reload category list via AJAX
+        function loadCategories() {
+            $.ajax({
+                url: window.location.href,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.categories) {
+                        renderCategories(response.categories);
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+{% endblock %}
