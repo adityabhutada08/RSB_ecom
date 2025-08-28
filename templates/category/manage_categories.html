@@ -4,9 +4,19 @@
 {% block content %}
 <div class="container mt-4">
 
+    {% if user.is_staff or user.is_superadmin or user.is_admin %}
+    <a href="{% url 'price_manager' %}" class="btn btn-primary btn-lg mb-3">Manage Prices</a> &nbsp;
+    <a href="{% url 'stock_manager' %}" class="btn btn-primary btn-lg mb-3">Manage Stock</a>  &nbsp;
+    <a href="{% url 'category:manage_categories' %}" class="btn btn-primary btn-lg mb-3">+ Add Category</a> &nbsp;
+    <a href="{% url 'manage_products' %}" class="btn btn-primary btn-lg mb-3">+ Add Product</a><br> <br>
+    {% endif %}
+  
+
+
+
   <div class="card shadow-sm">
     <div class="card-header bg-primary text-white">
-      <h2 class="mb-0">Add New Category</h2>
+      <h2 class="mb-0">➕ Add New Category</h2>
     </div>
     <div class="card-body">
       <form method="POST" enctype="multipart/form-data" class="needs-validation">

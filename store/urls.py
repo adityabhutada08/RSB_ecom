@@ -12,4 +12,13 @@ urlpatterns = [
 
     path("stock-manager/", views.stock_manager, name="stock_manager"),
     path("update-stock/", views.update_product_stock, name="update_product_stock"),
+
+
+
+    # path('products/', views.product_list, name='product_list'),
+    # path('products/add/', views.add_product, name='add_product'),
+    # path('products/edit/<int:product_id>/', views.edit_product, name='edit_product'),
+    path('admin/products/', views.manage_products, name='manage_products'),
+    path('admin/products/<int:pk>/delete/', views.delete_product, name='delete_product'),
+
 ]

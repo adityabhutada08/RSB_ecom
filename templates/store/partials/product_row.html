@@ -1,0 +1,23 @@
+<tr id="product-row-{{ product.id }}">
+    <td>
+      {% if product.images %}
+        <img src="{{ product.images.url }}" width="60" alt="{{ product.product_name }}">
+      {% else %}
+        <span class="text-muted">No Image</span>
+      {% endif %}
+    </td>
+    <td>{{ product.product_name }}</td>
+    <td>{{ product.category.category_name }}</td>
+    <td>{{ product.price }}</td>
+    <td>{{ product.stock }}</td>
+    <td>{% if product.is_available %}Yes{% else %}No{% endif %}</td>
+    <td>
+      <button type="button"
+        class="btn btn-danger btn-sm delete-btn"
+        data-url="{% url 'delete_product' product.id %}"
+        data-id="{{ product.id }}">
+        Delete
+      </button>
+    </td>
+  </tr>
+  

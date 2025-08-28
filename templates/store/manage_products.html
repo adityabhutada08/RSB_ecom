@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+
+  {% if user.is_staff or user.is_superadmin or user.is_admin %}
+  <a href="{% url 'price_manager' %}" class="btn btn-primary btn-lg mb-3">Manage Prices</a> &nbsp;
+  <a href="{% url 'stock_manager' %}" class="btn btn-primary btn-lg mb-3">Manage Stock</a>  &nbsp;
+  <a href="{% url 'category:manage_categories' %}" class="btn btn-primary btn-lg mb-3">+ Add Category</a> &nbsp;
+  <a href="{% url 'manage_products' %}" class="btn btn-primary btn-lg mb-3">+ Add Product</a><br> <br>
+  {% endif %}
+  
+
+
+
+
+  <!-- Add Product Form -->
+  <div class="card shadow-sm mb-4">
+    <h5>If Product Category is not in the list then first please add the correct product category!!!!</h5> 
+    <div class="card-header bg-primary text-white">
+      <h2 class="mb-0">➕ Add Product</h2>
+    </div>
+    <div class="card-body">
+      <div id="flash" class="alert alert-success d-none" role="alert"></div>
+
+      <form method="POST" enctype="multipart/form-data" id="product-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success w-100">Add Product</button>
+      </form>
+
+      <div id="form-errors" class="text-danger mt-2"></div>
+    </div>
+  </div>
+<hr>
+  <!-- Product List -->
+  <div class="container mt-4">
+    <h2>List of all Products</h2>
+
+    <!-- Realtime AJAX Search -->
+    <input type="text" id="search-box" placeholder="Search products..." class="form-control mb-3" value="{{ query|default:'' }}" />
+    <div class="mb-3">
+      <button class="btn btn-outline-secondary sort-btn" data-sort="name_asc">Name ↑</button>
+      <button class="btn btn-outline-secondary sort-btn" data-sort="name_desc">Name ↓</button>
+      <button class="btn btn-outline-secondary sort-btn" data-sort="price_low">Price ↑</button>
+      <button class="btn btn-outline-secondary sort-btn" data-sort="price_high">Price ↓</button>
+    </div>
+    
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th><div>
+            <a href="#" class="btn btn-primary btn-sm sort-btn" data-sort="name_asc" id="sort-asc">Name ↑</a>
+            <a href="#" class="btn btn-primary btn-sm sort-btn" data-sort="name_desc" id="sort-desc">↓</a>
+          </div></th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Available</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="product-table-body">
+        {% include "store/partials/product_table_body.html" with products=products %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+(function(){
+  // CSRF cookie helper
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  const csrftoken = getCookie('csrftoken');
+
+  // debounce helper for search
+  function debounce(fn, delay) {
+    let t = null;
+    return function(...args) {
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, args), delay);
+    }
+  }
+
+  // AJAX add product
+  $('#product-form').on('submit', function(e){
+    e.preventDefault();
+    const form = this;
+    let formData = new FormData(form);
+
+    $.ajax({
+      url: '', // same URL
+      type: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false,
+      headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": csrftoken
+      },
+      success: function(response){
+        if(response.success){
+          $('#form-errors').html('');
+          // Prepend new row
+          if (response.row_html) {
+            $('#product-table-body').prepend(response.row_html);
+          }
+          // Clear the form inputs (including file inputs)
+          form.reset();
+          $(form).find('input[type="file"]').val('');
+          // flash message for 3s
+          const $flash = $('#flash');
+          $flash.text(response.message || 'Product added successfully').removeClass('d-none');
+          setTimeout(()=> { $flash.addClass('d-none').text(''); }, 3000);
+        } else {
+          // show form errors (dictionary)
+          let errors = '';
+          if (response.errors) {
+            for (const field in response.errors) {
+              response.errors[field].forEach(error => {
+                errors += `<p><strong>${field}</strong>: ${error}</p>`;
+              });
+            }
+          } else {
+            errors = '<p>Failed to add product.</p>';
+          }
+          $('#form-errors').html(errors);
+        }
+      },
+      error: function(xhr, status, err){
+        $('#form-errors').html('<p>Server or network error.</p>');
+      }
+    });
+  });
+
+  // AJAX delete product (delegated)
+  $('#product-table-body').on('click', '.delete-btn', function(){
+    const btn = $(this);
+    const url = btn.data('url');
+    const rowId = btn.data('id');
+    if(!confirm('Are you sure you want to delete this product?')) return;
+    $.ajax({
+      url: url,
+      type: 'POST',
+      headers: {
+        "X-CSRFToken": csrftoken,
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      success: function(response){
+        if(response.success){
+          $('#product-row-' + rowId).fadeOut(200, function(){ $(this).remove(); });
+        } else {
+          alert(response.error || 'Delete failed');
+        }
+      },
+      error: function(){
+        alert('Network error.');
+      }
+    });
+  });
+
+
+
+  // --- Sorting ---
+  $('.sort-btn').on('click', function(e){
+    e.preventDefault();
+    let sortValue = $(this).data('sort');
+    $.ajax({
+      url: `?sort=${sortValue}`,
+      type: 'GET',
+      dataType: 'json',
+      beforeSend: function(xhr){ xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); },
+      success: function(response){
+        if(response.success){
+          $('#product-table-body').html(response.table_html);
+        }
+      },
+      error: function(){
+        alert("❌ Failed to sort products.");
+      }
+    });
+  });
+
+  // --- Search ---
+  $('#search-box').on('keyup', function(){
+    let query = $(this).val();
+    $.ajax({
+      url: `?q=${query}`,
+      type: 'GET',
+      dataType: 'json',
+      beforeSend: function(xhr){ xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); },
+      success: function(response){
+        if(response.success){
+          $('#product-table-body').html(response.table_html);
+        }
+      }
+    });
+  });
+
+
+
+
+  // AJAX live search (debounced)
+  $('#search-box').on('input', debounce(function(){
+    const query = $(this).val();
+    $.ajax({
+      url: "{% url 'manage_products' %}",  // adjust if namespaced
+      type: 'GET',
+      data: { q: query },
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+      success: function(response){
+        if(response.success && response.table_html){
+          $('#product-table-body').html(response.table_html);
+        }
+      },
+      error: function(){
+        console.error('Search failed');
+      }
+    });
+  }, 250));
+
+})();
+</script>
+{% endblock %}

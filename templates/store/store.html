@@ -15,9 +15,10 @@
         {% endif %}
 
         {% if user.is_staff or user.is_superadmin or user.is_admin %}
-        <a href="{% url 'price_manager' %}" class="btn btn-primary btn-lg">Manage Prices</a> &nbsp;
-        <a href="{% url 'stock_manager' %}" class="btn btn-primary btn-lg">Manage Stock</a>  &nbsp;
-        <a href="{% url 'category:manage_categories' %}" class="btn btn-primary btn-lg">+ Add Category</a><br> <br>
+        <a href="{% url 'price_manager' %}" class="btn btn-primary btn-lg mb-3">Manage Prices</a> &nbsp;
+        <a href="{% url 'stock_manager' %}" class="btn btn-primary btn-lg mb-3">Manage Stock</a>  &nbsp;
+        <a href="{% url 'category:manage_categories' %}" class="btn btn-primary btn-lg mb-3">+ Add Category</a> &nbsp;
+        <a href="{% url 'manage_products' %}" class="btn btn-primary btn-lg mb-3">+ Add Product</a><br> <br>
         {% endif %}
         
     </div> <!-- container //  -->

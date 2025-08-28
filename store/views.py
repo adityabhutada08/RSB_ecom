@@ -214,3 +214,119 @@ def submit_review(request, product_id):
                 data.save()
                 messages.success(request, 'Thank you! Your review has been submitted.')
                 return redirect(url)
+
+                
+# store/views.py
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.contrib.auth.decorators import user_passes_test
+from django.template.loader import render_to_string
+from .models import Product
+from .forms import ProductForm
+
+
+@user_passes_test(_is_staff_user)
+def manage_products(request):
+    """
+    Admin page: add a product (AJAX), live-search, and sort products (AJAX).
+    """
+    is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+    query = request.GET.get("q", "")
+    sort_by = request.GET.get("sort", "")
+
+    # Base queryset
+    products = Product.objects.all()
+
+    # --- Filtering by search ---
+    if query:
+        products = products.filter(product_name__icontains=query)
+
+    # --- Sorting logic ---
+    if sort_by == "name_asc":
+        products = products.order_by("product_name")
+    elif sort_by == "name_desc":
+        products = products.order_by("-product_name")
+    elif sort_by == "price_low":
+        products = products.order_by("price")
+    elif sort_by == "price_high":
+        products = products.order_by("-price")
+    else:
+        products = products.order_by("-id")  # default: latest first
+
+    form = ProductForm(request.POST or None, request.FILES or None)
+
+    # --- Add Product (AJAX) ---
+    if request.method == "POST":
+        if form.is_valid():
+            product = form.save()
+            if is_ajax:
+                row_html = render_to_string(
+                    "store/partials/product_row.html",
+                    {"product": product},
+                    request=request,
+                )
+                return JsonResponse(
+                    {"success": True, "row_html": row_html, "message": "Product added successfully"}
+                )
+            return redirect("manage_products")
+        else:
+            if is_ajax:
+                return JsonResponse({"success": False, "errors": form.errors})
+
+    # --- Return products table for AJAX (search/sort) ---
+    if is_ajax and request.method == "GET":
+        table_html = render_to_string(
+            "store/partials/product_table_body.html",
+            {"products": products},
+            request=request,
+        )
+        return JsonResponse({"success": True, "table_html": table_html})
+
+    # Normal page load
+    context = {
+        "form": form,
+        "products": products,
+        "query": query,
+    }
+    return render(request, "store/manage_products.html", context)
+
+
+
+@user_passes_test(_is_staff_user)
+@require_POST
+def delete_product(request, pk):
+    try:
+        product = get_object_or_404(Product, pk=pk)
+        product.delete()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from .models import Product
+
+@require_GET
+def sort_products(request):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' and 'sort' in request.GET:
+        sort_by = request.GET.get('sort')
+        products_qs = Product.objects.all()
+
+        if sort_by == 'name_asc':
+            products_qs = products_qs.order_by('product_name')
+        elif sort_by == 'name_desc':
+            products_qs = products_qs.order_by('-product_name')
+
+        # serialize queryset into JSON
+        data = [{
+            'id': prod.id,
+            'product_name': prod.product_name,
+            'slug': prod.slug,
+            'description': prod.description,
+            'price': float(prod.price),
+            'stock': prod.stock,
+            'image': prod.images.url if prod.images else ''
+        } for prod in products_qs]
+
+        return JsonResponse({'products': data})
