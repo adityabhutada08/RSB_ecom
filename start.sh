@@ -1,10 +1,12 @@
 #!/bin/sh
 
 # This script ensures the database is ready before running Django commands.
+DB_HOST=${DB_HOST}
+DB_PORT=${DB_PORT}
 
 # 1. Wait for the database service ('db') to be ready on port 5432
 echo "Waiting for PostgreSQL to start..."
-while ! nc -z db 5432; do
+while ! nc -z $DB_HOST $DB_PORT; do
   sleep 0.5
 done
 echo "PostgreSQL is up and running. Proceeding with Django setup."
