@@ -95,7 +95,7 @@ AUTH_USER_MODEL = 'accounts.Account'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# Use PostgreSQL if DB_HOST is set (Docker), otherwise use SQLite
+# Use PostgreSQL if DB_HOST is set (Docker/Render), otherwise use SQLite
 if config('DB_HOST', default=None):
     DATABASES = {
         'default': {
@@ -105,6 +105,11 @@ if config('DB_HOST', default=None):
             'PASSWORD': config('DB_PASSWORD', default='rsb_password'),
             'HOST': config('DB_HOST', default='db'),
             'PORT': config('DB_PORT', default='5432'),
+            # === RENDER SSL FIX ===
+            'OPTIONS': {
+                'sslmode': 'require',
+            }
+            # ======================
         }
     }
 else:
