@@ -26,17 +26,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-
-RENDER_EXTERNAL_HOSTNAME = config('ALLOWED_HOSTS', default=None)
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS = [RENDER_EXTERNAL_HOSTNAME]
-    # Add your local hostnames for development only
-    if DEBUG:
-        ALLOWED_HOSTS += ['localhost', '127.0.0.1', '0.0.0.0']
-else:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1'] # Default for local SQLite/Docker
-# =================================================================
-
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
 _raw_csrf = config('CSRF_TRUSTED_ORIGINS', default='', cast=str)
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in _raw_csrf.split(',') if origin.strip()]
 
@@ -105,21 +95,16 @@ AUTH_USER_MODEL = 'accounts.Account'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# Use PostgreSQL if DB_HOST is set (Docker/Render), otherwise use SQLite
+# Use PostgreSQL if DB_HOST is set (Docker), otherwise use SQLite
 if config('DB_HOST', default=None):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': config('DB_NAME', default='rsb_db_xmwp'), # <- IMPORTANT: Use the Render DB name
+            'NAME': config('DB_NAME', default='rsb_db'),
             'USER': config('DB_USER', default='rsb_user'),
-            'PASSWORD': config('DB_PASSWORD', default='sE1VFQ79FBpvNlSEDnMEzT516vLf1yxN'), # <- IMPORTANT: Use the Render DB password as default
-            'HOST': config('DB_HOST', default='dpg-d4iotdc9c44c73b1cgog-a.singapore-postgres.render.com'), # <- IMPORTANT: Use the Render DB Host as default
+            'PASSWORD': config('DB_PASSWORD', default='rsb_password'),
+            'HOST': config('DB_HOST', default='db'),
             'PORT': config('DB_PORT', default='5432'),
-            # === RENDER SSL FIX ===
-            'OPTIONS': {
-                'sslmode': 'require',
-            }
-            # ======================
         }
     }
 else:
